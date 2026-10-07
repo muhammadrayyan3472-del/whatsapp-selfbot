@@ -55,12 +55,12 @@ async function testCmd(name, input, expectedCheck) {
   await testCmd('calc', '.calc 12+4*2', r => r.includes('20'));
   await testCmd('pct', '.pct 20 500', r => r.includes('100'));
 
-  // Test text transformations
-  await testCmd('caps', '.caps hello world', r => r === 'HELLO WORLD');
-  await testCmd('lower', '.lower HELLO WORLD', r => r === 'hello world');
-  await testCmd('reverse', '.reverse abc', r => r === 'cba');
-  await testCmd('mock', '.mock hello world', r => r === 'hElLo wOrLd');
-  await testCmd('base64text', '.base64text hello', r => r === 'aGVsbG8=');
+  // Test text transformations with ZAYDX UI format
+  await testCmd('caps', '.caps hello world', r => r.includes('HELLO WORLD') && r.includes('CAPS'));
+  await testCmd('lower', '.lower HELLO WORLD', r => r.includes('hello world') && r.includes('LOWER'));
+  await testCmd('reverse', '.reverse abc', r => r.includes('cba'));
+  await testCmd('mock', '.mock hello world', r => r.includes('hElLo wOrLd'));
+  await testCmd('base64text', '.base64text hello', r => r.includes('aGVsbG8='));
 
   // Test unit conversions
   await testCmd('c2f', '.c2f 0', r => r.includes('32.00 °F'));
@@ -70,7 +70,7 @@ async function testCmd(name, input, expectedCheck) {
   await testCmd('note', '.note test note', r => r.includes('Saved note'));
   await testCmd('todo', '.todo test task', r => r.includes('Added Todo'));
   await testCmd('ping', '.ping', r => r.includes('Pong'));
-  await testCmd('help', '.help core', r => r.includes('Commands'));
+  await testCmd('help', '.help core', r => r.includes('CORE'));
 
   console.log(`SMOKE_OK: Verified ${results.length} core test assertions successfully!`);
 })().catch(e => {

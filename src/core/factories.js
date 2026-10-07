@@ -254,7 +254,7 @@ function textFactory(name, op, aliases = []) {
       default:
         out = s;
     }
-    return ctx.msg.reply(out);
+    return h.send(ctx, name.toUpperCase(), out);
   }, aliases, 'text');
 }
 
@@ -267,7 +267,7 @@ function mathFactory(name, op, aliases = []) {
       if (!expr) return ctx.msg.reply(`Usage: ${config.prefix}calc <math-expression>\nExample: .calc (12+4)*5/2`);
       try {
         const result = h.evalMath(expr);
-        return ctx.msg.reply(`Result: ${result}`);
+        return h.send(ctx, '🧮 CALCULATOR', `${expr} = ${result}`);
       } catch (err) {
         return ctx.msg.reply(`Calc Error: ${err.message}`);
       }
@@ -281,7 +281,7 @@ function mathFactory(name, op, aliases = []) {
         const sides = Math.max(2, Number(match[2]));
         const rolls = Array.from({ length: count }, () => Math.floor(Math.random() * sides) + 1);
         const total = rolls.reduce((x, y) => x + y, 0);
-        return ctx.msg.reply(`🎲 Rolled ${count}d${sides}: [${rolls.join(', ')}] = Total: ${total}`);
+        return h.send(ctx, '🎲 DICE ROLL', `${count}d${sides}: [${rolls.join(', ')}]\nTotal: ${total}`);
       }
       const sides = Math.max(2, Number(arg) || 6);
       return ctx.msg.reply(`🎲 Rolled (1-${sides}): ${Math.floor(Math.random() * sides) + 1}`);
@@ -365,27 +365,46 @@ function coreFactory(name, op, aliases = []) {
       case 'help': {
         const cat = (ctx.args[0] || '').toLowerCase();
         const page = Math.max(1, Number(ctx.args[1]) || 1);
+
+        if (!cat) {
+          const catEmoji = {
+            core: '⚙️', account: '👤', chat: '💬',
+            group: '👥', message: '📨', media: '🖼️',
+            text: '🔤', tools: '🛠️', utility: '🔧', fun: '🎮'
+          };
+          const cats = [...new Set([...ctx.commands.values()].map(c => c.category))].sort();
+          const lines = cats.map(c => {
+            const emoji = catEmoji[c] || '📁';
+            return emoji + ' | *' + c.toUpperCase() + '* : *`' + ctx.config.prefix + 'help ' + c + '`*';
+          });
+          const total = [...new Set([...ctx.commands.values()].map(c => c.name))].length;
+          return h.send(ctx, 'Z A Y D X  S E L F B O T',
+            'Total Commands: *' + total + '*\n\n' + lines.join('\n') +
+            '\n\n_Use ' + ctx.config.prefix + 'help [category] [page] for command list_'
+          );
+        }
+
         const a = [...new Set([...ctx.commands.values()].map(c => c.name))]
-          .filter(n => !cat || ctx.commands.get(n)?.category === cat).sort();
+          .filter(n => ctx.commands.get(n)?.category === cat).sort();
         const size = 50;
         const pages = Math.max(1, Math.ceil(a.length / size));
         const p = Math.min(page, pages);
-        return ctx.msg.reply(
-          `*WhatsApp Selfbot Commands* ${cat ? `[${cat}]` : ''} (${p}/${pages})\n` +
-          `Total: ${a.length} commands\n\n` +
-          a.slice((p - 1) * size, p * size).map(n => ctx.config.prefix + n).join(' | ') +
-          `\n\n_Use ${ctx.config.prefix}help [category] [page] or ${ctx.config.prefix}cmd <name>_`
+        return h.send(ctx, cat.toUpperCase() + ' (' + p + '/' + pages + ')',
+          a.length + ' commands\n\n' +
+          a.slice((p - 1) * size, p * size).map(n => ctx.config.prefix + n).join('  ')
         );
       }
       case 'cmd': {
         const c = ctx.commands.get((ctx.args[0] || '').toLowerCase());
-        return ctx.msg.reply(
-          c ? `*${ctx.config.prefix}${c.name}*\nCategory: ${c.category}\nAliases: ${(c.aliases || []).join(', ') || 'none'}`
-            : 'Command not found.'
-        );
+        return c
+          ? h.send(ctx, ctx.config.prefix + c.name,
+              'Category: ' + c.category + '\nAliases: ' + ((c.aliases || []).join(', ') || 'none'))
+          : ctx.msg.reply('Command not found.');
       }
-      case 'categories':
-        return ctx.msg.reply(`*Categories:*\n` + [...new Set([...ctx.commands.values()].map(c => c.category))].sort().join(' | '));
+      case 'categories': {
+        const cats = [...new Set([...ctx.commands.values()].map(c => c.category))].sort();
+        return h.send(ctx, 'CATEGORIES', cats.join(' | '));
+      }
       case 'ping': {
         const t = Date.now();
         const m = await ctx.msg.reply('Pong!');
@@ -393,36 +412,38 @@ function coreFactory(name, op, aliases = []) {
       }
       case 'runtime': {
         const s = Math.floor((Date.now() - ctx.startedAt) / 1000);
-        return ctx.msg.reply(`Uptime: ${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`);
+        return h.send(ctx, 'UPTIME',
+          Math.floor(s / 3600) + 'h ' + Math.floor((s % 3600) / 60) + 'm ' + (s % 60) + 's');
       }
       case 'status': {
         const s = Math.floor((Date.now() - ctx.startedAt) / 1000);
         const mem = process.memoryUsage();
         const state = await ctx.client.getState().catch(() => 'unknown');
-        return ctx.msg.reply(
-          `*System Status:*\n` +
-          `• State: ${state}\n` +
-          `• Uptime: ${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s\n` +
-          `• Commands: ${ctx.commands.__canonicalCount}\n` +
-          `• Memory RSS: ${h.bytes(mem.rss)}\n` +
-          `• Heap: ${h.bytes(mem.heapUsed)} / ${h.bytes(mem.heapTotal)}\n` +
-          `• Node: ${process.version} (${process.platform})`
+        return h.send(ctx, 'SYSTEM STATUS',
+          `State       : ${state}\n` +
+          `Uptime      : ${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s\n` +
+          `Commands    : ${ctx.commands.__canonicalCount}\n` +
+          `Memory RSS  : ${h.bytes(mem.rss)}\n` +
+          `Heap        : ${h.bytes(mem.heapUsed)} / ${h.bytes(mem.heapTotal)}\n` +
+          `Node        : ${process.version} (${process.platform})`
         );
       }
       case 'state':
-        return ctx.msg.reply(`WhatsApp state: ${await ctx.client.getState().catch(() => 'unknown')}`);
+        return h.send(ctx, 'WA STATE', await ctx.client.getState().catch(() => 'unknown'));
       case 'count':
-        return ctx.msg.reply(`Canonical commands: ${ctx.commands.__canonicalCount}\nTotal command keys: ${ctx.commands.size}`);
+        return h.send(ctx, 'COMMAND COUNT',
+          `Canonical: ${ctx.commands.__canonicalCount}\nTotal keys: ${ctx.commands.size}`);
       case 'about':
-        return ctx.msg.reply('WhatsApp Personal Selfbot — High-performance personal automation client.');
+        return h.send(ctx, 'Z A Y D X  S E L F B O T',
+          'High-performance WhatsApp personal automation client.\nBuilt with whatsapp-web.js • Deploy on Railway\n\ngithub.com/muhammadrayyan3472-del/whatsapp-selfbot');
       case 'prefix':
-        return ctx.msg.reply(`Current prefix: \`${ctx.config.prefix}\``);
+        return h.send(ctx, 'PREFIX', `Current prefix: \`${ctx.config.prefix}\``);
       case 'now':
-        return ctx.msg.reply(new Date().toString());
+        return h.send(ctx, 'NOW', new Date().toString());
       case 'date':
-        return ctx.msg.reply(new Date().toLocaleDateString());
+        return h.send(ctx, 'DATE', new Date().toLocaleDateString());
       case 'time':
-        return ctx.msg.reply(new Date().toLocaleTimeString());
+        return h.send(ctx, 'TIME', new Date().toLocaleTimeString());
       case 'unix':
         return ctx.msg.reply(String(Math.floor(Date.now() / 1000)));
       case 'iso':
@@ -439,7 +460,8 @@ function coreFactory(name, op, aliases = []) {
         return ctx.msg.reply(process.cwd());
       case 'memory': {
         const m = process.memoryUsage();
-        return ctx.msg.reply(`Memory Usage:\nRSS: ${h.bytes(m.rss)}\nHeap: ${h.bytes(m.heapUsed)} / ${h.bytes(m.heapTotal)}`);
+        return h.send(ctx, 'MEMORY',
+          `RSS  : ${h.bytes(m.rss)}\nHeap : ${h.bytes(m.heapUsed)} / ${h.bytes(m.heapTotal)}`);
       }
       case 'restart':
         return ctx.msg.reply('Restart Node from terminal to reload modules.');
@@ -451,7 +473,7 @@ function coreFactory(name, op, aliases = []) {
       case 'debug':
         return ctx.msg.reply(`Command=${ctx.args[0] || 'none'} | Chat=${ctx.msg.from || ctx.msg.to} | Type=${ctx.msg.type}`);
       case 'version':
-        return ctx.msg.reply('Build 2.1.0 — Cleaned, optimized, and fully validated.');
+        return h.send(ctx, 'VERSION', 'Build 2.1.0 — Cleaned, optimized, UI styled.');
       default:
         return ctx.msg.reply('Core command.');
     }
@@ -464,11 +486,11 @@ function accountFactory(name, op, aliases = []) {
     const i = ctx.client.info || {};
     switch (op) {
       case 'me':
-        return ctx.msg.reply(`*Your Account:*\nName: ${h.safeName(c)}\nID: ${h.jidOf(c)}`);
+        return h.send(ctx, 'MY ACCOUNT', `Name: ${h.safeName(c)}\nID: ${h.jidOf(c)}`);
       case 'name':
-        return ctx.msg.reply(`Display Name: ${h.safeName(c)}`);
+        return h.send(ctx, 'DISPLAY NAME', h.safeName(c));
       case 'bio':
-        return ctx.msg.reply(`About/Bio: ${c?.about || '(unavailable)'}`);
+        return h.send(ctx, 'BIO', c?.about || '(unavailable)');
       case 'profile':
         return ctx.msg.reply(await c?.getProfilePicUrl?.().catch(() => null) || 'No profile picture URL.');
       case 'setname':
@@ -484,7 +506,7 @@ function accountFactory(name, op, aliases = []) {
         return ctx.msg.reply(b ? `Battery: ${b.battery}% ${b.plugged ? '(charging)' : ''}` : 'Battery info unavailable.');
       }
       case 'device':
-        return ctx.msg.reply(`Platform: ${i.platform || 'unknown'}\nPushname: ${i.pushname || 'unknown'}`);
+        return h.send(ctx, 'DEVICE', `Platform: ${i.platform || 'unknown'}\nPushname: ${i.pushname || 'unknown'}`);
       case 'number':
         return ctx.msg.reply(`Phone Number: ${String(i.wid?._serialized || i.wid?.$1 || i.wid || 'unknown')}`);
       case 'block':
@@ -502,11 +524,10 @@ function accountFactory(name, op, aliases = []) {
       case 'id':
         return ctx.msg.reply(`JID: ${h.jidOf(c)}`);
       case 'accountinfo':
-        return ctx.msg.reply(
-          `*Account Info:*\n` +
-          `• Pushname: ${i.pushname || 'unknown'}\n` +
-          `• Platform: ${i.platform || 'unknown'}\n` +
-          `• WID: ${i.wid?._serialized || i.wid?.$1 || 'unknown'}`
+        return h.send(ctx, 'ACCOUNT INFO',
+          `Pushname : ${i.pushname || 'unknown'}\n` +
+          `Platform : ${i.platform || 'unknown'}\n` +
+          `WID      : ${i.wid?._serialized || i.wid?.$1 || 'unknown'}`
         );
       case 'logout':
         await ctx.msg.reply('Logging out from WhatsApp Web...');
@@ -515,12 +536,11 @@ function accountFactory(name, op, aliases = []) {
         const q = await h.getQuoted(ctx);
         const target = q ? await q.getContact() : c;
         if (!target) return ctx.msg.reply('Could not resolve contact.');
-        return ctx.msg.reply(
-          `*Contact Details:*\n` +
-          `• Name: ${h.safeName(target)}\n` +
-          `• Number: ${target.number || 'unknown'}\n` +
-          `• Business: ${!!target.isBusiness}\n` +
-          `• JID: ${h.jidOf(target)}`
+        return h.send(ctx, 'CONTACT INFO',
+          `Name     : ${h.safeName(target)}\n` +
+          `Number   : ${target.number || 'unknown'}\n` +
+          `Business : ${!!target.isBusiness}\n` +
+          `JID      : ${h.jidOf(target)}`
         );
       }
       default:
@@ -536,15 +556,14 @@ function chatFactory(name, op, aliases = []) {
 
     switch (op) {
       case 'info':
-        return ctx.msg.reply(
-          `*Chat Info:*\n` +
-          `• Name: ${c.name || 'Unnamed'}\n` +
-          `• JID: ${c.id?._serialized || c.id?.$1 || ''}\n` +
-          `• Group: ${!!c.isGroup}\n` +
-          `• Unread: ${c.unreadCount ?? 0}\n` +
-          `• Muted: ${!!c.isMuted}\n` +
-          `• Pinned: ${!!c.pinned}\n` +
-          `• Archived: ${!!c.archived}`
+        return h.send(ctx, 'CHAT INFO',
+          `Name     : ${c.name || 'Unnamed'}\n` +
+          `JID      : ${c.id?._serialized || c.id?.$1 || ''}\n` +
+          `Group    : ${!!c.isGroup}\n` +
+          `Unread   : ${c.unreadCount ?? 0}\n` +
+          `Muted    : ${!!c.isMuted}\n` +
+          `Pinned   : ${!!c.pinned}\n` +
+          `Archived : ${!!c.archived}`
         );
       case 'archive':
         await c.archive();
@@ -613,24 +632,21 @@ function chatFactory(name, op, aliases = []) {
       case 'listchats': {
         const chats = await ctx.client.getChats().catch(() => []);
         const top = chats.slice(0, 15);
-        return ctx.msg.reply(
-          `*Recent Chats (${top.length}):*\n` +
+        return h.send(ctx, `CHATS (${top.length})`,
           top.map((x, i) => `${i + 1}. ${x.name || 'Unnamed'} ${x.isGroup ? '👥' : '👤'} ${x.unreadCount ? `(${x.unreadCount} unread)` : ''}`).join('\n') || 'No chats.'
         );
       }
       case 'groups': {
         const chats = await ctx.client.getChats().catch(() => []);
         const gps = chats.filter(x => x.isGroup).slice(0, 20);
-        return ctx.msg.reply(
-          `*Joined Groups (${gps.length}):*\n` +
+        return h.send(ctx, `GROUPS (${gps.length})`,
           gps.map((x, i) => `${i + 1}. ${x.name || 'Unnamed'} (${x.participants?.length || '?'} members)`).join('\n') || 'No groups found.'
         );
       }
       case 'privatechats': {
         const chats = await ctx.client.getChats().catch(() => []);
         const dms = chats.filter(x => !x.isGroup).slice(0, 15);
-        return ctx.msg.reply(
-          `*Direct Chats (${dms.length}):*\n` +
+        return h.send(ctx, `DIRECT CHATS (${dms.length})`,
           dms.map((x, i) => `${i + 1}. ${x.name || 'Unnamed'}`).join('\n') || 'No direct chats found.'
         );
       }
@@ -651,12 +667,11 @@ function groupFactory(name, op, aliases = []) {
 
     switch (op) {
       case 'info':
-        return ctx.msg.reply(
-          `*Group Information:*\n` +
-          `• Name: ${c.name}\n` +
-          `• JID: ${c.id?._serialized || c.id?.$1}\n` +
-          `• Members: ${c.participants?.length || 0}\n` +
-          `• Description: ${c.description || '(none)'}`
+        return h.send(ctx, 'GROUP INFO',
+          `Name        : ${c.name}\n` +
+          `JID         : ${c.id?._serialized || c.id?.$1}\n` +
+          `Members     : ${c.participants?.length || 0}\n` +
+          `Description : ${c.description || '(none)'}`
         );
       case 'name':
         return ctx.msg.reply(`Group Name: ${c.name}`);
@@ -670,17 +685,15 @@ function groupFactory(name, op, aliases = []) {
         await c.setDescription(ctx.rest || '');
         return ctx.msg.reply('Group description updated.');
       case 'members':
-        return ctx.msg.reply(
-          `*Group Members (${c.participants.length}):*\n` +
-          c.participants.slice(0, 50).map(p => `${p.isAdmin || p.isSuperAdmin ? '👑 ' : '• '}${p.id?._serialized || p.id?.$1}`).join('\n') +
+        return h.send(ctx, `MEMBERS (${c.participants.length})`,
+          c.participants.slice(0, 50).map(p => `${p.isAdmin || p.isSuperAdmin ? '👑' : '•'} ${p.id?._serialized || p.id?.$1}`).join('\n') +
           (c.participants.length > 50 ? `\n...and ${c.participants.length - 50} more.` : '')
         );
       case 'membercount':
         return ctx.msg.reply(`Member count: ${c.participants.length}`);
       case 'admins':
-        return ctx.msg.reply(
-          `*Group Admins:*\n` +
-          (c.participants.filter(p => p.isAdmin || p.isSuperAdmin).map(p => `👑 ${p.id?._serialized || p.id?.$1}`).join('\n') || 'None')
+        return h.send(ctx, 'GROUP ADMINS',
+          c.participants.filter(p => p.isAdmin || p.isSuperAdmin).map(p => `👑 ${p.id?._serialized || p.id?.$1}`).join('\n') || 'None'
         );
       case 'promote': {
         const q = await h.getQuoted(ctx);
@@ -748,7 +761,7 @@ function groupFactory(name, op, aliases = []) {
       }
       case 'grouprules': {
         const rules = store.get(`rules_${c.id?._serialized || c.id?.$1}`, 'No rules set for this group.');
-        return ctx.msg.reply(`*Group Rules:*\n${rules}`);
+        return h.send(ctx, 'GROUP RULES', rules);
       }
       case 'setgrouprules': {
         if (!ctx.rest) return ctx.msg.reply(`Usage: ${config.prefix}setgrouprules <rules text>`);
@@ -901,16 +914,16 @@ function utilityFactory(name, op, aliases = []) {
     if (op === 'notes') {
       const n = store.notes();
       const entries = Object.entries(n);
-      return ctx.msg.reply(
-        entries.length ? `*Your Notes:*\n` + entries.map(([id, x]) => `• [${id}]: ${x.text}`).join('\n') : 'No notes saved.'
+      return h.send(ctx, 'YOUR NOTES',
+        entries.length ? entries.map(([id, x]) => `• [${id}]: ${x.text}`).join('\n') : 'No notes saved.'
       );
     }
     if (op === 'findnote') {
       const q = ctx.rest.toLowerCase();
       if (!q) return ctx.msg.reply(`Usage: ${config.prefix}findnote <query>`);
       const matches = Object.entries(store.notes()).filter(([, x]) => x.text.toLowerCase().includes(q));
-      return ctx.msg.reply(
-        matches.length ? `*Matching Notes:*\n` + matches.map(([id, x]) => `• [${id}]: ${x.text}`).join('\n') : 'No matching notes found.'
+      return h.send(ctx, 'MATCHING NOTES',
+        matches.length ? matches.map(([id, x]) => `• [${id}]: ${x.text}`).join('\n') : 'No matching notes found.'
       );
     }
     if (op === 'delnote') {
@@ -935,8 +948,8 @@ function utilityFactory(name, op, aliases = []) {
     if (op === 'todos') {
       const t = store.todos();
       const entries = Object.entries(t);
-      return ctx.msg.reply(
-        entries.length ? `*Your Tasks:*\n` + entries.map(([id, x]) => `${x.done ? '✅' : '⬜'} [${id}]: ${x.text}`).join('\n') : 'No tasks on your list.'
+      return h.send(ctx, 'YOUR TASKS',
+        entries.length ? entries.map(([id, x]) => `${x.done ? '✅' : '⬜'} [${id}]: ${x.text}`).join('\n') : 'No tasks on your list.'
       );
     }
     if (op === 'donetodo') {
@@ -981,7 +994,7 @@ function utilityFactory(name, op, aliases = []) {
       try {
         const res = await fetch(`https://wttr.in/${city}?format=3`, { signal: AbortSignal.timeout(6000) });
         const text = await res.text();
-        return ctx.msg.reply(`Weather: ${text.trim()}`);
+        return h.send(ctx, '🌤️ WEATHER', text.trim());
       } catch {
         return ctx.msg.reply('Weather lookup timed out or unavailable.');
       }
@@ -994,7 +1007,7 @@ function utilityFactory(name, op, aliases = []) {
         const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(6000) });
         const j = await res.json();
         if (j.extract) {
-          return ctx.msg.reply(`*${j.title}:*\n${j.extract}\n\nRead more: ${j.content_urls?.desktop?.page || ''}`);
+          return h.send(ctx, '📖 ' + j.title.toUpperCase(), j.extract + '\n\n' + (j.content_urls?.desktop?.page || ''));
         }
         return ctx.msg.reply('No Wikipedia page found for this topic.');
       } catch {
@@ -1012,12 +1025,12 @@ function utilityFactory(name, op, aliases = []) {
         });
         const j = await res.json();
         if (j.login) {
-          return ctx.msg.reply(
-            `*GitHub: ${j.login} (${j.name || 'No Name'})*\n` +
-            `• Bio: ${j.bio || 'None'}\n` +
-            `• Public Repos: ${j.public_repos}\n` +
-            `• Followers: ${j.followers} | Following: ${j.following}\n` +
-            `• Profile: ${j.html_url}`
+          return h.send(ctx, '🐙 GITHUB: ' + j.login.toUpperCase(),
+            `Name    : ${j.name || 'None'}\n` +
+            `Bio     : ${j.bio || 'None'}\n` +
+            `Repos   : ${j.public_repos}\n` +
+            `Follows : ${j.followers} followers / ${j.following} following\n` +
+            j.html_url
           );
         }
         return ctx.msg.reply('GitHub user not found.');
@@ -1045,7 +1058,7 @@ function utilityFactory(name, op, aliases = []) {
       try {
         const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`, { signal: AbortSignal.timeout(6000) });
         const j = await res.json();
-        if (j[id]?.usd != null) return ctx.msg.reply(`💰 ${coin.toUpperCase()}: $${j[id].usd}`);
+        if (j[id]?.usd != null) return h.send(ctx, '💰 CRYPTO', `${coin.toUpperCase()} = ${j[id].usd} USD`);
         return ctx.msg.reply(`Price for "${coin}" not found.`);
       } catch {
         return ctx.msg.reply('Crypto price lookup failed.');
@@ -1167,9 +1180,9 @@ function funFactory(name, op, aliases = []) {
 
     if (op === '8ball') {
       const answers = ['Yes, definitely.', 'Outlook good.', 'Most likely.', 'Ask again later.', 'Cannot predict now.', 'Don’t count on it.', 'My sources say no.', 'Very doubtful.'];
-      return ctx.msg.reply(`🎱 ${answers[Math.floor(Math.random() * answers.length)]}`);
+      return h.send(ctx, '🎱 8BALL', answers[Math.floor(Math.random() * answers.length)]);
     }
-    if (op === 'rate') return ctx.msg.reply(`Rating: ${Math.floor(Math.random() * 101)}/100`);
+    if (op === 'rate') return h.send(ctx, 'RATING', `${Math.floor(Math.random() * 101)}/100`);
     if (op === 'yesno') return ctx.msg.reply(Math.random() < 0.5 ? '✅ Yes' : '❌ No');
     if (op === 'rps') {
       const opts = ['rock', 'paper', 'scissors'], u = (ctx.args[0] || '').toLowerCase();
@@ -1189,7 +1202,7 @@ function funFactory(name, op, aliases = []) {
     if (op === 'love') {
       const n1 = ctx.args[0] || 'Person 1', n2 = ctx.args[1] || 'Person 2';
       const pct = Math.floor(Math.random() * 101);
-      return ctx.msg.reply(`❤️ Love Compatibility between ${n1} & ${n2}: ${pct}%`);
+      return h.send(ctx, '❤️ LOVE METER', `${n1} & ${n2} = ${pct}%`);
     }
     if (op === 'randomnumber') {
       const max = Math.max(1, Number(ctx.args[0]) || 100);
@@ -1222,7 +1235,7 @@ function funFactory(name, op, aliases = []) {
     }
 
     const arr = pools[op] || ['Fun command.'];
-    return ctx.msg.reply(arr[Math.floor(Math.random() * arr.length)]);
+    return h.send(ctx, op.toUpperCase(), arr[Math.floor(Math.random() * arr.length)]);
   }, aliases, 'fun');
 }
 
