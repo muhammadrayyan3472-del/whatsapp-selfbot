@@ -3,7 +3,8 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const config = require('./core/config');
 const { parseArgs } = require('./core/context');
 const { loadCommands } = require('./core/loader');
-const { normalizeId } = require('./core/helpers');
+const h = require('./core/helpers');
+const { normalizeId } = h;
 
 const phone = (process.env.PHONE_NUMBER || '').replace(/\D/g, '');
 const pairing = process.env.PAIRING_CODE !== 'false' && !!phone;
@@ -37,10 +38,13 @@ const client = new Client({
 
 const commands = loadCommands(path.join(__dirname, 'commands'));
 const startedAt = Date.now();
-console.log(`[BOOT] ${commands.__canonicalCount} canonical commands / ${commands.size} keys loaded.`);
-
 client.on('code', code => {
-  console.log(`\n=============================\n=== WHATSAPP PAIRING CODE ===\n          ${code}\n=============================\n`);
+  const codeBox = [
+    `[+]================================] | [ PAIRING CODE ] | [================================[+]`,
+    `[-]                         >>>  ${code}  <<<                         [-]`,
+    `[+]========================================================================================[+]`
+  ].join('\n');
+  console.log('\n' + h.gradient(codeBox) + '\n');
 });
 
 client.on('qr', qr => {
@@ -52,8 +56,25 @@ client.on('qr', qr => {
   }
 });
 
-client.on('authenticated', () => console.log('[AUTH] Successfully authenticated!'));
-client.on('ready', () => console.log(`[READY] WhatsApp client is ready! ${commands.__canonicalCount} commands active.`));
+client.on('authenticated', () => console.log('\x1b[32m[AUTH] Successfully authenticated!\x1b[0m'));
+
+client.on('ready', async () => {
+  try { console.clear(); } catch {}
+  const userName = client.info?.pushname || client.info?.wid?.user || phone || 'ZAYDX User';
+  const banner = [
+    `[+]================================] | [ Z A Y D X ] | [================================[+]`,
+    `[+]================================] | [ S E L F B O T ] | [================================[+]`,
+    `[-]================================] | [ ${userName} ] | [================================[-]`,
+    `[-]================================] | [ CMDS : ${commands.__canonicalCount} ] | [================================[-]`
+  ];
+
+  for (const line of banner) {
+    console.log(h.gradient(line));
+    await new Promise(r => setTimeout(r, 100));
+  }
+  console.log(`\n\x1b[32m[+] WhatsApp Selfbot Ready & Listening on Prefix: "${config.prefix}"\x1b[0m\n`);
+});
+
 client.on('auth_failure', e => console.error('[AUTH FAILURE]', e));
 client.on('disconnected', r => console.log('[DISCONNECTED]', r));
 

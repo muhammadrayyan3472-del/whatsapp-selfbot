@@ -250,6 +250,49 @@ function mockText(s) {
   return [...String(s || '')].map((c, i) => i % 2 ? c.toUpperCase() : c.toLowerCase()).join('');
 }
 
+function formatUI(header, description, footer = null, senderName = 'Rayyan', timezone = 'Asia/Karachi') {
+  let timeStr = '';
+  try {
+    timeStr = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', hour12: true, timeZone: timezone
+    });
+  } catch {
+    timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+  const footerText = footer ? footer : `requested by ${senderName} | ${timeStr}`;
+
+  let out = '';
+  if (header && header !== '.') {
+    out += `> ╭━━━〔 *${header}* 〕━━━╮\n`;
+  } else {
+    out += `> ╭━━━━━━━━━━━━━━━━━━━━━━━━╮\n`;
+  }
+
+  const lines = String(description || '').split('\n');
+  for (const line of lines) {
+    out += `> │ ${line}\n`;
+  }
+  out += `> ╰━━━━━━━━━━━━━━━━━━━━━━━━╯\n`;
+  out += `*__\`${footerText}\`__*`;
+  return out;
+}
+
+async function send(ctx, header, description, footer = null) {
+  const user = ctx.contact?.pushname || ctx.contact?.name || 'Rayyan';
+  const tz = ctx.config?.timezone || 'Asia/Karachi';
+  const formatted = formatUI(header, description, footer, user, tz);
+  return await ctx.msg.reply(formatted);
+}
+
+function gradient(text) {
+  const colors = [51, 45, 39, 33, 27];
+  const lines = text.split('\n');
+  return lines.map((line, idx) => {
+    const c = colors[idx % colors.length];
+    return `\x1b[38;5;${c}m${line}\x1b[0m`;
+  }).join('\n');
+}
+
 module.exports = {
   normalizeId,
   getChat,
@@ -273,5 +316,9 @@ module.exports = {
   vaporwave,
   bubbleText,
   upsideDown,
-  mockText
+  mockText,
+  formatUI,
+  send,
+  gradient
 };
+
