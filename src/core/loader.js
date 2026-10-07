@@ -1,0 +1,3 @@
+const fs=require('fs'),path=require('path');
+function loadCommands(base){const map=new Map(),seen=new Set();for(const cat of fs.readdirSync(base,{withFileTypes:true}).filter(x=>x.isDirectory())){for(const file of fs.readdirSync(path.join(base,cat.name)).filter(x=>x.endsWith('.js'))){for(const c of require(path.join(base,cat.name,file))||[]){if(!c?.name||typeof c.run!=='function')continue;c.category=c.category||cat.name;seen.add(c.name);for(const key of [c.name,...(c.aliases||[])]){const k=key.toLowerCase();if(!map.has(k))map.set(k,c)}}}}map.__canonicalCount=seen.size;return map}
+module.exports={loadCommands};

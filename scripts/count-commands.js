@@ -1,0 +1,1 @@
+const {loadCommands}=require('../src/core/loader');const path=require('path');const c=loadCommands(path.join(__dirname,'../src/commands'));const names=[...new Set([...c.values()].map(x=>x.name))];console.log(`Loaded ${c.size} command keys / ${names.length} canonical commands.`);for(const x of names.sort())console.log(x);if(names.length<300)process.exit(1);

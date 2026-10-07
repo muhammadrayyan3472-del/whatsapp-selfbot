@@ -1,0 +1,345 @@
+# WhatsApp Personal Selfbot Command Reference
+
+Canonical commands: **321** | Total command aliases: **478**
+
+## account (16)
+- .accountinfo *(aliases: .accinfo)*
+- .battery
+- .block
+- .business *(aliases: .isbusiness)*
+- .contactinfo *(aliases: .cinfo, .userinfo)*
+- .device
+- .logout
+- .me *(aliases: .whoami)*
+- .mybio *(aliases: .bio, .about)*
+- .myname *(aliases: .displayname)*
+- .myprofilepic *(aliases: .pp, .pic, .avatar)*
+- .number *(aliases: .phone, .mynumber)*
+- .setbio
+- .setname
+- .unblock
+- .verified *(aliases: .isverified)*
+
+## chat (25)
+- .archive
+- .chatarchived *(aliases: .isarchived)*
+- .chatcontact *(aliases: .directcontact)*
+- .chatid *(aliases: .cid)*
+- .chatinfo *(aliases: .cinfo)*
+- .chatmuted *(aliases: .ismuted)*
+- .chatname
+- .chatpinned *(aliases: .ispinned)*
+- .clearchat *(aliases: .clear)*
+- .fetchmessages *(aliases: .fetch)*
+- .groups *(aliases: .grouplist)*
+- .history *(aliases: .messages)*
+- .isgroup
+- .last *(aliases: .lastmsg)*
+- .listchats *(aliases: .chats)*
+- .markread *(aliases: .read, .seen, .markseen)*
+- .markunread
+- .mute
+- .pin
+- .privatechats *(aliases: .dms)*
+- .sendtext *(aliases: .sendmsg)*
+- .unarchive
+- .unmute
+- .unpin
+- .unreadcount
+
+## core (26)
+- .about *(aliases: .botinfo)*
+- .categories *(aliases: .cats)*
+- .cmd *(aliases: .command, .commandinfo)*
+- .count *(aliases: .commandcount)*
+- .cwd
+- .date
+- .debug
+- .echo
+- .help *(aliases: .h, .commands, .menu)*
+- .iso
+- .memory *(aliases: .mem, .ram)*
+- .node
+- .now *(aliases: .datetime)*
+- .pid
+- .ping *(aliases: .speed, .latency)*
+- .platform
+- .prefix *(aliases: .getprefix)*
+- .restart
+- .runtime *(aliases: .uptime)*
+- .shutdown *(aliases: .stop)*
+- .state *(aliases: .clientstate)*
+- .status *(aliases: .stats, .sysinfo)*
+- .time *(aliases: .clock)*
+- .timezone *(aliases: .tz)*
+- .unix
+- .version
+
+## fun (24)
+- .8ball *(aliases: .eightball)*
+- .ascii *(aliases: .art, .emoticon)*
+- .boom
+- .clap
+- .compliment
+- .dicegame *(aliases: .rolldice)*
+- .joke *(aliases: .meme)*
+- .love *(aliases: .ship, .compatibility)*
+- .mood
+- .party
+- .quoteoftheday *(aliases: .qotd, .quote)*
+- .randomdate
+- .randomemoji
+- .randomfact
+- .randomletter
+- .randomname
+- .randomnumber *(aliases: .randnum)*
+- .randomtime
+- .rate
+- .riddle
+- .roast
+- .rps *(aliases: .rockpaperscissors)*
+- .wyr *(aliases: .wouldyourather)*
+- .yesno
+
+## group (26)
+- .addmember *(aliases: .add)*
+- .demote
+- .groupadmins *(aliases: .admins, .adminlist)*
+- .groupdesc *(aliases: .description)*
+- .groupid *(aliases: .gjid, .groupjid)*
+- .groupinfo *(aliases: .ginfo, .groupabout)*
+- .grouplock *(aliases: .announce, .groupchatlock)*
+- .groupmembers *(aliases: .members, .participants, .memberslist)*
+- .groupname *(aliases: .groupsubject)*
+- .groupowner
+- .grouprules *(aliases: .rules)*
+- .groupseen *(aliases: .groupread)*
+- .groupstats *(aliases: .admincount)*
+- .groupunlock *(aliases: .groupchatunlock)*
+- .infolock *(aliases: .groupinfolock)*
+- .infounlock *(aliases: .groupinfounlock)*
+- .invitelink *(aliases: .invite, .grouplink)*
+- .leavegroup *(aliases: .leave)*
+- .membercount *(aliases: .mc, .totalmembers)*
+- .promote
+- .removemember *(aliases: .kick, .remove)*
+- .revokeinvite
+- .setgroupdesc *(aliases: .setdescription)*
+- .setgroupname *(aliases: .setsubject, .gname)*
+- .setgrouprules *(aliases: .setrules)*
+- .tagall *(aliases: .everyone, .mentions, .hidetag)*
+
+## media (16)
+- .clearmedia *(aliases: .cleardownloads)*
+- .downloadmedia *(aliases: .download, .savemedia, .save)*
+- .filename
+- .hasmedia
+- .mediaauthor
+- .mediafolder *(aliases: .downloads)*
+- .mediaid
+- .mediainfo *(aliases: .mediaabout)*
+- .mediatype
+- .mimetype
+- .sendaudio
+- .senddocument
+- .sendfile
+- .sendimage
+- .sendvideo
+- .sticker *(aliases: .s, .stickerify)*
+
+## message (21)
+- .author
+- .bodylength
+- .charcount
+- .copy *(aliases: .repeatmsg)*
+- .delete *(aliases: .delmsg)*
+- .forward
+- .isstarred
+- .mentionme
+- .messageid *(aliases: .msgid)*
+- .messagetime
+- .quotedauthor
+- .quotedbody
+- .quotedid
+- .quotedtype
+- .react
+- .snipe *(aliases: .sniped)*
+- .snipeall
+- .star
+- .type
+- .unstar
+- .wordcount
+
+## text (70)
+- .altcaps *(aliases: .mock)*
+- .backticks
+- .base64text
+- .bold
+- .brackets
+- .bubble *(aliases: .circletext)*
+- .caps *(aliases: .upper, .uppercase)*
+- .censor
+- .charcodes
+- .codeblock *(aliases: .monospace)*
+- .commafy
+- .compact
+- .countchars *(aliases: .charlen)*
+- .countdigits
+- .countlines *(aliases: .linelen)*
+- .countlower
+- .countspaces
+- .countupper
+- .countvowels
+- .countwords *(aliases: .wordlen)*
+- .dash
+- .demorse
+- .digits
+- .dot
+- .firstchar
+- .firstword
+- .hextext
+- .italic
+- .lastchar
+- .lastword
+- .leet
+- .letters
+- .lower *(aliases: .lowercase)*
+- .morse
+- .newline
+- .nodigits
+- .nodupchars
+- .nospaces
+- .nosymbols
+- .novowels
+- .numbersum
+- .palindrome
+- .parentheses
+- .pipeify
+- .quoteformat
+- .quotes
+- .repeatword *(aliases: .repeat)*
+- .reverse
+- .reversewords
+- .rot13
+- .shufflewords
+- .slashify
+- .slug
+- .sortwords
+- .spaced
+- .spoiler
+- .strikethrough *(aliases: .strike)*
+- .swapcase *(aliases: .swap)*
+- .title *(aliases: .titlecase)*
+- .trim
+- .underline
+- .underscore
+- .unicode
+- .uniquewords
+- .upsidedown *(aliases: .fliptext)*
+- .vaporwave *(aliases: .wide)*
+- .vowels
+- .wrap40
+- .wrap60
+- .wrap80
+
+## tools (52)
+- .abs
+- .avg *(aliases: .average)*
+- .bytes2kb
+- .c2f
+- .c2k
+- .calc *(aliases: .calculate, .math)*
+- .ceil
+- .choose *(aliases: .pick)*
+- .coin *(aliases: .coinflip)*
+- .cos
+- .day2hr
+- .dice
+- .div *(aliases: .divide)*
+- .f2c
+- .f2k
+- .floor
+- .ft2m
+- .gal2l
+- .gb2tb
+- .genpass *(aliases: .password, .pw)*
+- .hr2day
+- .hr2min
+- .k2c
+- .k2f
+- .kb2mb
+- .kg2lb
+- .km2mi
+- .kmh2mph
+- .l2gal
+- .lb2kg
+- .m2ft
+- .max
+- .mb2gb
+- .mi2km
+- .min
+- .min2hr
+- .min2sec
+- .mod
+- .mph2kmh
+- .mul *(aliases: .multiply)*
+- .pct *(aliases: .percentage)*
+- .percent
+- .pow *(aliases: .power)*
+- .random *(aliases: .rand)*
+- .roll
+- .round
+- .sec2min
+- .sin
+- .sqrt
+- .sub
+- .sum
+- .tan
+
+## utility (45)
+- .afk
+- .b64decode *(aliases: .b64d)*
+- .base64 *(aliases: .b64)*
+- .btc *(aliases: .bitcoin)*
+- .bytes
+- .clearnotes
+- .cleartodos
+- .crypto *(aliases: .coinprice)*
+- .daysleft
+- .delnote *(aliases: .rmnote)*
+- .delsetting
+- .deltodo
+- .donetodo
+- .eth *(aliases: .ethereum)*
+- .findnote *(aliases: .searchnote)*
+- .getsetting
+- .github *(aliases: .gh)*
+- .hash
+- .iplookup *(aliases: .ip, .dns)*
+- .jsonformat *(aliases: .json)*
+- .md5
+- .month
+- .note *(aliases: .addnote)*
+- .notes *(aliases: .listnotes)*
+- .poll
+- .randomcolor *(aliases: .hexcolor)*
+- .remind *(aliases: .reminder)*
+- .schedule *(aliases: .timer)*
+- .setsetting
+- .settings
+- .sha1
+- .sha256
+- .sha512
+- .sol *(aliases: .solana)*
+- .timestamp *(aliases: .unixtime)*
+- .today
+- .todo *(aliases: .addtodo)*
+- .todos *(aliases: .listtodo)*
+- .tomorrow
+- .unafk
+- .uuid
+- .weather *(aliases: .forecast)*
+- .wiki *(aliases: .wikipedia)*
+- .year
+- .yesterday
+

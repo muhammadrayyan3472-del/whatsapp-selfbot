@@ -1,0 +1,6 @@
+node_modules/
+.wwebjs_auth/
+session/
+data/store.json
+downloads/*
+.env

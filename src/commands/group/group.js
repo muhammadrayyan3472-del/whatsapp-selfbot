@@ -1,0 +1,30 @@
+const { groupFactory } = require('../../core/factories');
+
+module.exports = [
+  groupFactory("groupinfo", "info", ["ginfo", "groupabout"]),
+  groupFactory("groupname", "name", ["groupsubject"]),
+  groupFactory("setgroupname", "setname", ["setsubject", "gname"]),
+  groupFactory("groupdesc", "desc", ["description"]),
+  groupFactory("setgroupdesc", "setdesc", ["setdescription"]),
+  groupFactory("groupmembers", "members", ["members", "participants", "memberslist"]),
+  groupFactory("membercount", "membercount", ["mc", "totalmembers"]),
+  groupFactory("groupadmins", "admins", ["admins", "adminlist"]),
+  groupFactory("promote", "promote"),
+  groupFactory("demote", "demote"),
+  groupFactory("addmember", "add", ["add"]),
+  groupFactory("removemember", "remove", ["kick", "remove"]),
+  groupFactory("leavegroup", "leave", ["leave"]),
+  groupFactory("invitelink", "invite", ["invite", "grouplink"]),
+  groupFactory("revokeinvite", "revoke"),
+  groupFactory("groupid", "id", ["gjid", "groupjid"]),
+  groupFactory("groupowner", "owner"),
+  groupFactory("groupstats", "stats", ["admincount"]),
+  groupFactory("grouplock", "lock", ["announce", "groupchatlock"]),
+  groupFactory("groupunlock", "unlock", ["groupchatunlock"]),
+  groupFactory("infolock", "infolock", ["groupinfolock"]),
+  groupFactory("infounlock", "infounlock", ["groupinfounlock"]),
+  groupFactory("groupseen", "read", ["groupread"]),
+  groupFactory("tagall", "tagall", ["everyone", "mentions", "hidetag"]),
+  groupFactory("grouprules", "grouprules", ["rules"]),
+  groupFactory("setgrouprules", "setgrouprules", ["setrules"])
+];

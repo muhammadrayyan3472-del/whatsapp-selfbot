@@ -1,0 +1,1 @@
+Unofficial WhatsApp Web automation for your own account. Respect WhatsApp rules. Do not use this project for unsolicited bulk messaging, spam, private-data scraping, or attempts to evade platform protections.

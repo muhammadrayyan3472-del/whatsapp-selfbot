@@ -1,0 +1,30 @@
+const { coreFactory } = require('../../core/factories');
+
+module.exports = [
+  coreFactory("help", "help", ["h", "commands", "menu"]),
+  coreFactory("cmd", "cmd", ["command", "commandinfo"]),
+  coreFactory("categories", "categories", ["cats"]),
+  coreFactory("ping", "ping", ["speed", "latency"]),
+  coreFactory("about", "about", ["botinfo"]),
+  coreFactory("runtime", "runtime", ["uptime"]),
+  coreFactory("status", "status", ["stats", "sysinfo"]),
+  coreFactory("state", "state", ["clientstate"]),
+  coreFactory("prefix", "prefix", ["getprefix"]),
+  coreFactory("count", "count", ["commandcount"]),
+  coreFactory("node", "node"),
+  coreFactory("platform", "platform"),
+  coreFactory("pid", "pid"),
+  coreFactory("cwd", "cwd"),
+  coreFactory("memory", "memory", ["mem", "ram"]),
+  coreFactory("now", "now", ["datetime"]),
+  coreFactory("date", "date"),
+  coreFactory("time", "time", ["clock"]),
+  coreFactory("unix", "unix"),
+  coreFactory("iso", "iso"),
+  coreFactory("timezone", "timezone", ["tz"]),
+  coreFactory("restart", "restart"),
+  coreFactory("shutdown", "shutdown", ["stop"]),
+  coreFactory("version", "version"),
+  coreFactory("debug", "debug"),
+  coreFactory("echo", "echo")
+];
