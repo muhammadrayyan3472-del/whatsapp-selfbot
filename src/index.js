@@ -1,3 +1,10 @@
+process.on('unhandledRejection', (reason) => {
+  console.warn('[UNHANDLED REJECTION]', reason?.message || reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT EXCEPTION]', err?.message || err);
+});
+
 const path = require('path');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const config = require('./core/config');
@@ -32,24 +39,44 @@ const client = new Client({
   authStrategy: new LocalAuth({ dataPath: config.authDir }),
   puppeteer: puppeteerConfig,
   deviceName: 'WA Personal Selfbot',
-  browserName: 'Chrome',
-  ...(pairing ? { pairWithPhoneNumber: { phoneNumber: phone, showNotification: true, intervalMs: 180000 } } : {})
+  browserName: 'Chrome'
 });
 
 const commands = loadCommands(path.join(__dirname, 'commands'));
 const startedAt = Date.now();
-client.on('code', code => {
+
+function showCodeBox(code) {
   const codeBox = [
     `[+]================================] | [ PAIRING CODE ] | [================================[+]`,
     `[-]                         >>>  ${code}  <<<                         [-]`,
     `[+]========================================================================================[+]`
   ].join('\n');
   console.log('\n' + h.gradient(codeBox) + '\n');
+}
+
+client.on('code', code => {
+  showCodeBox(code);
 });
 
-client.on('qr', qr => {
-  console.log('[INFO] QR code received; pairing mode:', pairing);
-  if (!pairing) {
+let pairingAttempted = false;
+client.on('qr', async qr => {
+  if (pairing && !pairingAttempted) {
+    pairingAttempted = true;
+    console.log(`\n\x1b[36m[PAIRING] Page ready. Requesting pairing code for +${phone}...\x1b[0m`);
+    await new Promise(r => setTimeout(r, 3000));
+    try {
+      const code = await client.requestPairingCode(phone, true, 180000);
+      if (code) showCodeBox(code);
+    } catch (err) {
+      console.warn(`\n\x1b[33m[PAIRING NOTICE] Pairing code request failed (${err?.message || err}).\x1b[0m`);
+      console.log('\x1b[32m[BACKUP QR] Displaying QR code below (Scan with WhatsApp -> Linked Devices -> Link a device):\x1b[0m\n');
+      try {
+        require('qrcode-terminal').generate(qr, { small: true });
+      } catch {}
+      setTimeout(() => { pairingAttempted = false; }, 60000);
+    }
+  } else if (!pairing) {
+    console.log('[QR] Scan with WhatsApp -> Linked Devices:');
     try {
       require('qrcode-terminal').generate(qr, { small: true });
     } catch {}
